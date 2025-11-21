@@ -1,25 +1,26 @@
-from config import cold_start, at, as_, ndim, beta, mass2, mass2_U1, rng, umat, zmat
+from config import cold_start, z_from_indices, at, as_, ndim, beta, mass2, mass2_U1, rng, umat, z_index, grid_indices, grid_values
 from metropolis import metropolis_sweep
 from measure import measure_plaquette_U, measure_plaquette_Z, measure_polyakov
 import pandas as pd
 
 def run_monte_carlo(
-    umat, zmat,
+    umat, z_index, grid_indices,
     n_therm=5000, n_meas=5000, meas_interval=10,
-    eps_U=0.1, eps_Z=0.1
+    eps_U=0.1
 ):
-    cold_start(umat, zmat, at, as_, ndim)
+    cold_start(umat, z_index, as_, ndim)
+    zmat = z_from_indices(z_index, grid_values)
 
     # Heating
     for i in range(n_therm):
-        aU, aZ = metropolis_sweep(umat, zmat, beta, eps_U, eps_Z,
-                                  at, as_, mass2, mass2_U1, rng)
+        aU, aZ = metropolis_sweep(umat, zmat, z_index, beta, eps_U, 
+                                  grid_indices, grid_values, at, as_, mass2, mass2_U1, rng)
 
     # test
     results = []
     for istep in range(n_meas):
-        aU, aZ = metropolis_sweep(umat, zmat, beta, eps_U, eps_Z,
-                                  at, as_, mass2, mass2_U1, rng)
+        aU, aZ = metropolis_sweep(umat, zmat, z_index, beta, eps_U, 
+                                  grid_indices, grid_values, at, as_, mass2, mass2_U1, rng)
         if (istep + 1) % meas_interval == 0:
             # S_tot = total_action(umat, zmat, at, as_, mass2, mass2_U1)
             plaq_Z = measure_plaquette_Z(zmat)
@@ -49,10 +50,10 @@ def save_results_csv(filename, results):
             writer.writerow(r)
 
 if __name__ == "__main__":
-    results = run_monte_carlo(umat, zmat,
+    results = run_monte_carlo(umat, z_index, grid_indices,
                               n_therm=10000,
                               n_meas=5000,
                               meas_interval=10,
                               eps_U=0.1,
-                              eps_Z=0.05)
-    save_results_csv("orbifold_metropolis_con_SU2_8x8x8.csv", results)
+                              )
+    save_results_csv("orbifold_metropolis_dig_SU2_8x8x8.csv", results)
