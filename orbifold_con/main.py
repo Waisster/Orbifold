@@ -2,6 +2,8 @@ from config import cold_start, at, as_, ndim, beta, mass2, mass2_U1, rng, umat, 
 from metropolis import metropolis_sweep
 from measure import measure_plaquette_U, measure_plaquette_Z, measure_polyakov
 import pandas as pd
+from tqdm import tqdm
+import time
 
 def run_monte_carlo(
     umat, zmat,
@@ -11,13 +13,16 @@ def run_monte_carlo(
     cold_start(umat, zmat, at, as_, ndim)
 
     # Heating
-    for i in range(n_therm):
+    print("Thermalization...")
+    for i in tqdm(range(n_therm)):
         aU, aZ = metropolis_sweep(umat, zmat, beta, eps_U, eps_Z,
                                   at, as_, mass2, mass2_U1, rng)
 
     # test
+    print("Measurement...")
     results = []
-    for istep in range(n_meas):
+    start_time = time.time()
+    for istep in tqdm(range(n_meas)):
         aU, aZ = metropolis_sweep(umat, zmat, beta, eps_U, eps_Z,
                                   at, as_, mass2, mass2_U1, rng)
         if (istep + 1) % meas_interval == 0:

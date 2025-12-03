@@ -61,4 +61,4 @@ if __name__ == "__main__":
                               meas_interval=10,
                               eps_U=0.1,
                               )
-    save_results_csv("orbifold_metropolis_dig_SU2_8x8x8.csv", results)
+    save_results_csv("orbifold_metropolis_dig_U1_8x8x8.csv", results)
